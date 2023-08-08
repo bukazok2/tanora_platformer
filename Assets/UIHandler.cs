@@ -1,18 +1,17 @@
-using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIHandler : MonoBehaviour
 {
-    [SerializeField] Button myBtn;
+    [SerializeField] Button play;
 
-    private void Start()
+    void Start()
     {
-        myBtn.onClick.AddListener(Method);
+        play.onClick.AddListener(Play);
     }
 
-    public void Method()
+    public void Play()
     {
         SceneManager.LoadScene("SampleScene");
     }

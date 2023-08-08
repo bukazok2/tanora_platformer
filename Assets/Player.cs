@@ -4,30 +4,60 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    [Header("Sebesség")]
+    [Range(5,17)]
+    [SerializeField] int speed = 10;
+    [Header("Forgási sebesség")]
+    [SerializeField] int rotationSpeed = 50;
 
-    private void FixedUpdate() // 30 frame
+    private void Awake()
     {
+
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        Debug.Log("Player létrejött" + this.ToString());
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        Debug.Log("Update");
+
         if (Input.GetKey(KeyCode.UpArrow))
-            transform.Translate(Vector3.forward * 10 * Time.deltaTime);
+        {
+            // Vector3 (1,0,0)
+            this.transform.Translate(Vector3.forward * this.speed * Time.deltaTime);
+        }
 
         if (Input.GetKey(KeyCode.DownArrow))
-            transform.Translate(-Vector3.forward * 10 * Time.deltaTime);
+        {
+            this.transform.Translate(-Vector3.forward * this.speed * Time.deltaTime);
+        }
 
         if (Input.GetKey(KeyCode.LeftArrow))
-            transform.Rotate(Vector3.up, -50 * Time.deltaTime);
+        {
+            this.transform.Rotate(Vector3.up, -rotationSpeed * Time.deltaTime);
+        }
 
         if (Input.GetKey(KeyCode.RightArrow))
-            transform.Rotate(Vector3.up, 50 * Time.deltaTime);
-
+        {
+            this.transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime);
+        }
     }
 
-    void Update() // jelenlegi fps-en fut
+    private void OnDestroy()
     {
-
+        Debug.Log("OnDestroy lefutott");
     }
 
-    private void OnCollisionEnter(Collision collision)
+    public override string ToString()
     {
-        Debug.Log("H");
+        string retStr = this.transform.position.ToString();
+
+        return retStr + base.ToString();
     }
 }

@@ -1,63 +1,75 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
-    [Header("Sebesség")]
-    [Range(5,17)]
-    [SerializeField] int speed = 10;
-    [Header("Forgási sebesség")]
-    [SerializeField] int rotationSpeed = 50;
+    [SerializeField] float speedChangeRate = 10f;
+    [SerializeField] float moveSpeed = 5.0f;
 
-    private void Awake()
-    {
+    [SerializeField] float speedOffset = 0.1f;
 
-    }
+    private float currentSpeed;
+    private float verticalVelocity;
+    private CharacterController characterController;
+    private PlayerInput inputActions;
 
-    // Start is called before the first frame update
+
     void Start()
     {
-        Debug.Log("Player létrejött" + this.ToString());
+        this.inputActions = new PlayerInput();
+        this.inputActions.Player.Enable();
+        this.inputActions.Player.Jump.performed += Jump_performed;
+        this.inputActions.Player.Movement.performed += Movement_performed;
 
+        this.characterController = this.GetComponent<CharacterController>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Movement_performed(InputAction.CallbackContext context)
     {
-        Debug.Log("Update");
-
-        if (Input.GetKey(KeyCode.UpArrow))
-        {
-            // Vector3 (1,0,0)
-            this.transform.Translate(Vector3.forward * this.speed * Time.deltaTime);
-        }
-
-        if (Input.GetKey(KeyCode.DownArrow))
-        {
-            this.transform.Translate(-Vector3.forward * this.speed * Time.deltaTime);
-        }
-
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            this.transform.Rotate(Vector3.up, -rotationSpeed * Time.deltaTime);
-        }
-
-        if (Input.GetKey(KeyCode.RightArrow))
-        {
-            this.transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime);
-        }
+        Vector2 inputVector = context.ReadValue<Vector2>();
+        Debug.Log(inputVector);
+        
     }
 
-    private void OnDestroy()
+    private void Jump_performed(InputAction.CallbackContext context)
     {
-        Debug.Log("OnDestroy lefutott");
+        Debug.Log("Jump");
     }
 
-    public override string ToString()
+    private void Update()
     {
-        string retStr = this.transform.position.ToString();
+        this.Move();
+    }
 
-        return retStr + base.ToString();
+    private void Move()
+    {
+        Vector2 inputVector = this.inputActions.Player.Movement.ReadValue<Vector2>();
+
+        float targetSpeed = this.moveSpeed;
+
+        if (inputVector == Vector2.zero)
+        {
+            targetSpeed = 0.0f;
+        }
+
+        float currentHorizontalSpeed = new Vector3(this.characterController.velocity.x, 0.0f, this.characterController.velocity.z).magnitude;
+
+        if (currentHorizontalSpeed < targetSpeed - this.speedOffset || currentHorizontalSpeed > targetSpeed + this.speedOffset)
+        {
+            this.currentSpeed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed, Time.deltaTime * speedChangeRate);
+
+            this.currentSpeed = Mathf.Round(this.currentSpeed * 1000f) / 1000f;
+        }
+        else
+        {
+            this.currentSpeed = targetSpeed;
+        }
+
+        Vector3 targetDirection = new Vector3(inputVector.x, 0.0f, inputVector.y);
+
+        this.characterController.Move(targetDirection * (currentSpeed * Time.deltaTime) +
+            new Vector3(0.0f, this.verticalVelocity, 0.0f) * Time.deltaTime);
     }
 }

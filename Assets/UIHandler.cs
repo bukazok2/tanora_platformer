@@ -9,6 +9,10 @@ public class UIHandler : MonoBehaviour
     void Start()
     {
         play.onClick.AddListener(Play);
+
+        Global.score = 1;
+
+        DontDestroyOnLoad(this);
     }
 
     public void Play()

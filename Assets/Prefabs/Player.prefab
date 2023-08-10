@@ -140,7 +140,7 @@ Transform:
   m_Children:
   - {fileID: 3381076317000640498}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4212845366377730670
 MeshFilter:
@@ -204,16 +204,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b711d2f24ab3ae648bfa0978f584194b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speedChangeRate: 10
   moveSpeed: 5
-  speedOffset: 0.1
-  groundOffset: 0.08
-  groundedRadius: 1.2
+  speedChangeRate: 10
+  jumpHeight: 1.2
+  gravity: -15
+  groundedOffset: 0.58
+  groundedRadius: 0.5
   groundLayers:
     serializedVersion: 2
     m_Bits: 64
-  jumpHeight: 1.2
   jumpTimeout: 0.5
+  fallTimeout: 0.15
   terminalVelocity: 53
 --- !u!54 &8528680412198094601
 Rigidbody:

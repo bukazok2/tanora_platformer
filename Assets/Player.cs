@@ -5,61 +5,91 @@ using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] float speedChangeRate = 10f;
-    [SerializeField] float moveSpeed = 5.0f;
+    public static Player Instance;
 
-    [SerializeField] float speedOffset = 0.1f;
-
-    private float currentSpeed;
-    private float verticalVelocity;
     private CharacterController characterController;
     private PlayerInput inputActions;
-    private bool isGrounded = true;
-    private float fallTimeoutDelta;
-    private float fallTimeout = 0.15f;
-    private bool isJumping;
-    private float jumpTimeoutDelta ;
-    private float gravity = -15f;
 
-    [Tooltip("Tooltip")]
-    [SerializeField] float groundOffset = 0.08f;
-    [SerializeField] float groundedRadius = 1.2f;
+    // player
+    private float currentSpeed;
+    // we need some offset to check if the max speed reached or not
+    private float speedOffset = 0.1f;
+    // Is player pressed jump action or not
+    private bool isJumping = false;
+    // Is player grounded we constantly checking it
+    private bool isGrounded = true;
+    // just to store the vertical velocity for Move method
+    private float verticalVelocity;
+
+
+    // timeout deltatime
+    private float jumpTimeoutDelta;
+    private float fallTimeoutDelta;
+
+    [SerializeField] float moveSpeed;
+
+    [Tooltip("Acceleration and deceleration")]
+    [SerializeField] float speedChangeRate = 10.0f;
+
     [Space(10)]
-    [SerializeField] LayerMask groundLayers;
+    [Tooltip("The height the player can jump")]
     [SerializeField] float jumpHeight = 1.2f;
+
+    [Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
+    [SerializeField] float gravity = -15.0f;
+
+    [Tooltip("Useful for rough ground")]
+    [SerializeField] float groundedOffset = 0.08f;
+
+    [Tooltip("The radius of the grounded check. Should match the radius of the CharacterController")]
+    [SerializeField] float groundedRadius = 1.2f;
+
+    [Tooltip("What layers the character uses as ground")]
+    [SerializeField] LayerMask groundLayers;
+
+    [Space(10)]
+    [Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
     [SerializeField] float jumpTimeout = 0.50f;
+
+    [Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs")]
+    [SerializeField] float fallTimeout = 0.15f;
+
+    [Tooltip("TerminalVelocity for gravity")]
     [SerializeField] float terminalVelocity = 53.0f;
 
-    void Start()
+    private void Start()
     {
+        if (Instance == null)
+            Instance = this;
+
+        this.characterController = this.GetComponent<CharacterController>();
         this.inputActions = new PlayerInput();
         this.inputActions.Player.Enable();
         this.inputActions.Player.Jump.performed += Jump_performed;
         this.inputActions.Player.Movement.performed += Movement_performed;
 
-        this.characterController = this.GetComponent<CharacterController>();
-
-        Global.score++;
-        Debug.Log(Global.score);
+        this.jumpTimeoutDelta = jumpTimeout;
+        this.fallTimeoutDelta = fallTimeout;
     }
 
     private void Movement_performed(InputAction.CallbackContext context)
     {
         Vector2 inputVector = context.ReadValue<Vector2>();
-        Debug.Log(inputVector);
-        GamePlayHandler.Instance.Init();
+        // Debug.Log(inputVector);
+        // de jelenleg ez csak 1 gomb nyomás , tehát nyomogatni kellene ,
+        // hogy mozogjon a player , ehelyett az update-bõl olvassuk ki
     }
 
     private void Jump_performed(InputAction.CallbackContext context)
     {
         this.isJumping = true;
-        Debug.Log("Jump");
+        Debug.Log("Jumping : " + this.isJumping);
     }
 
     private void Update()
     {
         this.JumpAndGravity();
-        this.GroundCheck();
+        this.GroundedCheck();
         this.Move();
     }
 
@@ -70,79 +100,66 @@ public class Player : MonoBehaviour
         float targetSpeed = this.moveSpeed;
 
         if (inputVector == Vector2.zero)
-        {
             targetSpeed = 0.0f;
-        }
 
-        float currentHorizontalSpeed = new Vector3(this.characterController.velocity.x, 0.0f, this.characterController.velocity.z).magnitude;
+        float currentHorizontalSpeed = new Vector3(characterController.velocity.x, 0.0f, characterController.velocity.z).magnitude;
 
-        if (currentHorizontalSpeed < targetSpeed - this.speedOffset || currentHorizontalSpeed > targetSpeed + this.speedOffset)
+        if (currentHorizontalSpeed < targetSpeed - speedOffset || currentHorizontalSpeed > targetSpeed + speedOffset)
         {
-            this.currentSpeed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed, Time.deltaTime * speedChangeRate);
+            currentSpeed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed, Time.deltaTime * speedChangeRate);
 
-            this.currentSpeed = Mathf.Round(this.currentSpeed * 1000f) / 1000f;
+            currentSpeed = Mathf.Round(currentSpeed * 1000f) / 1000f;
         }
         else
         {
-            this.currentSpeed = targetSpeed;
+            currentSpeed = targetSpeed;
         }
 
         Vector3 targetDirection = new Vector3(inputVector.x, 0.0f, inputVector.y);
-
-        this.characterController.Move(targetDirection * (currentSpeed * Time.deltaTime) +
-            new Vector3(0.0f, this.verticalVelocity, 0.0f) * Time.deltaTime);
+        // move the player
+        characterController.Move(targetDirection * (currentSpeed * Time.deltaTime) +
+                             new Vector3(0.0f, this.verticalVelocity, 0.0f) * Time.deltaTime);
     }
 
-    private void GroundCheck()
+    private void GroundedCheck()
     {
-        Vector3 spherePosition = new Vector3(this.transform.position.x, this.transform.position.y, this.transform.position.z);
+        // set sphere position, with offset
+        Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - groundedOffset,
+            transform.position.z);
+        this.isGrounded = Physics.CheckSphere(spherePosition, groundedRadius, groundLayers,
+            QueryTriggerInteraction.Ignore);
 
-        this.isGrounded = Physics.CheckSphere(spherePosition, this.groundedRadius, this.groundLayers, QueryTriggerInteraction.Ignore);
-
-        Debug.Log(isGrounded);
-    }
-
-    private void OnDrawGizmos()
-    {
-        Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
-        Color transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
-
-        if (this.isGrounded)
-            Gizmos.color = transparentGreen;
-        else
-            Gizmos.color = transparentRed;
-
-        Gizmos.DrawSphere(new Vector3(this.transform.position.x, this.transform.position.y - this.groundOffset, this.transform.position.z), this.groundedRadius);
+        Debug.Log(this.isGrounded);
     }
 
     private void JumpAndGravity()
     {
         if (this.isGrounded)
         {
-            // földön vagyunk de ugrani szeretnénk
+            // reset the fall timeout timer
             fallTimeoutDelta = fallTimeout;
 
-            if(this.verticalVelocity < 0.0f)
+            // stop our velocity dropping infinitely when grounded
+            if (this.verticalVelocity < 0.0f)
             {
                 this.verticalVelocity = -2f;
             }
 
-            if(this.isJumping && jumpTimeoutDelta <= 0.0f)
+            if (this.isJumping && jumpTimeoutDelta <= 0.0f)
             {
                 this.verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * this.gravity);
             }
 
-            if(jumpTimeoutDelta >= 0.0f)
+            if (jumpTimeoutDelta >= 0.0f)
             {
                 this.jumpTimeoutDelta -= Time.deltaTime;
             }
         }
         else
         {
-            // ugrottunk és földet érünk
             this.jumpTimeoutDelta = jumpTimeout;
 
-            if(this.fallTimeoutDelta >= 0.0f)
+            if (this.fallTimeoutDelta >= 0.0f)
             {
                 this.fallTimeoutDelta -= Time.deltaTime;
             }
@@ -150,11 +167,24 @@ public class Player : MonoBehaviour
             this.isJumping = false;
         }
 
-        if(this.verticalVelocity < this.terminalVelocity)
+        if (this.verticalVelocity < this.terminalVelocity)
         {
             this.verticalVelocity += this.gravity * Time.deltaTime;
         }
     }
 
 
+    private void OnDrawGizmos()
+    {
+        Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
+        Color transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
+
+        if (this.isGrounded) Gizmos.color = transparentGreen;
+        else Gizmos.color = transparentRed;
+
+        // when selected, draw a gizmo in the position of, and matching radius of, the grounded collider
+        Gizmos.DrawSphere(
+            new Vector3(transform.position.x, transform.position.y - groundedOffset, transform.position.z),
+            groundedRadius);
+    }
 }

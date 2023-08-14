@@ -57,6 +57,14 @@ public class Player : MonoBehaviour
     [Tooltip("TerminalVelocity for gravity")]
     [SerializeField] float terminalVelocity = 53.0f;
 
+    int score = 0;
+
+    public void AddScore(int score)
+    {
+        this.score += score;
+        Debug.Log(this.score);
+    }
+
     private void Start()
     {
         if (Instance == null)
@@ -186,5 +194,15 @@ public class Player : MonoBehaviour
         Gizmos.DrawSphere(
             new Vector3(transform.position.x, transform.position.y - groundedOffset, transform.position.z),
             groundedRadius);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        ICollectable ic = other.gameObject.GetComponent<ICollectable>();
+        if(ic != null)
+        {
+            // event fire
+            ic.Collect();
+        }
     }
 }

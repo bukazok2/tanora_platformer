@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,9 @@ using UnityEngine.InputSystem;
 public class Player : MonoBehaviour
 {
     public static Player Instance;
+
+    public static event Action<Player> OnPlayerSpawned = delegate { };
+    public static event Action<Player> OnPlayerJump = delegate { };
 
     private CharacterController characterController;
     private PlayerInput inputActions;
@@ -78,6 +82,8 @@ public class Player : MonoBehaviour
 
         this.jumpTimeoutDelta = jumpTimeout;
         this.fallTimeoutDelta = fallTimeout;
+
+        OnPlayerSpawned?.Invoke(this);
     }
 
     private void Movement_performed(InputAction.CallbackContext context)
@@ -155,6 +161,7 @@ public class Player : MonoBehaviour
 
             if (this.isJumping && jumpTimeoutDelta <= 0.0f)
             {
+                OnPlayerJump?.Invoke(this);
                 this.verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * this.gravity);
             }
 
@@ -199,7 +206,7 @@ public class Player : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         ICollectable ic = other.gameObject.GetComponent<ICollectable>();
-        if(ic != null)
+        if (ic != null)
         {
             // event fire
             ic.Collect();

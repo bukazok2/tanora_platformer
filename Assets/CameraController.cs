@@ -6,15 +6,21 @@ using Cinemachine;
 public class CameraController : MonoBehaviour
 {
     [SerializeField] CinemachineVirtualCamera vcam1;
-    private bool inited = false;
 
     /*[SerializeField] Vector3 offset = Vector3.zero;
     [SerializeField] float smoothTime = 0.1f;
     private Vector3 velocity = Vector3.zero;*/
 
-    void Start()
+    void Awake()
     {
+        Player.OnPlayerSpawned += Player_OnPlayerSpawned;
+    }
 
+    private void Player_OnPlayerSpawned(Player obj)
+    {
+        vcam1.LookAt = Player.Instance.transform;
+        vcam1.Follow = Player.Instance.transform;
+        Debug.Log("Player Spawned");
     }
 
     // Update is called once per frame
@@ -22,12 +28,6 @@ public class CameraController : MonoBehaviour
     {
         if (Player.Instance != null)
         {
-            if(!this.inited)
-            {
-                vcam1.LookAt = Player.Instance.transform;
-                vcam1.Follow = Player.Instance.transform;
-                this.inited = true;
-            }
             /*Vector3 targetPosition = Player.Instance.transform.position + offset;
             this.transform.position = Vector3.SmoothDamp(this.transform.position, targetPosition, ref velocity, this.smoothTime);
             this.transform.LookAt(Player.Instance.transform);*/

@@ -7,4 +7,6 @@ public class EnemyScriptable : ScriptableObject
     [SerializeField] public GameObject enemyGameobject;
     [SerializeField] public float speed;
     [SerializeField] public float dmg;
+    [SerializeField] public float aggroRange = 15f;
+    [SerializeField] public float attackRange = 1.5f;
 }

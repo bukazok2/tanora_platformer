@@ -6,7 +6,7 @@ public class EnemyAttackingState : EnemyBaseState
 {
     public override void EnterState(EnemyStateManager enemy)
     {
-        Debug.Log("enemy: attack");
+        
     }
 
     public override void OnDrawGizmos(EnemyStateManager enemy)
@@ -17,6 +17,6 @@ public class EnemyAttackingState : EnemyBaseState
 
     public override void UpdateState(EnemyStateManager enemy)
     {
-        //throw new System.NotImplementedException();
+        agent.SetDestination(Player.Instance.transform.position);
     }
 }

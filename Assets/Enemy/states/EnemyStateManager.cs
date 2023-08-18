@@ -34,6 +34,6 @@ public class EnemyStateManager : MonoBehaviour
     {
         currentState = state;
         state.EnterState(this);
-        Debug.Log("state switched");
+        Debug.Log("state switched " + state.ToString());
     }
 }

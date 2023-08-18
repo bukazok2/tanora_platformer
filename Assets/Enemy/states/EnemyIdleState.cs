@@ -2,27 +2,26 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
-public class EnemyChaseState : EnemyBaseState
+public class EnemyIdleState : EnemyBaseState
 {
     public override void EnterState(EnemyStateManager enemy)
     {
-        Debug.Log("enemy: chase");
-        agent.SetDestination(Player.Instance.transform.position);
+        agent.SetDestination(enemy.transform.position);
     }
 
     public override void OnDrawGizmos(EnemyStateManager enemy)
     {
-        Gizmos.color = Color.green;
+        Gizmos.color = Color.blue;
         DrawEverything();
     }
 
     public override void UpdateState(EnemyStateManager enemy)
     {
-        if (PlayerEnemyDistance <= enemyDetails.attackRange) 
+        if (PlayerEnemyDistance <= enemyDetails.aggroRange && PlayerEnemyDistance >= enemyDetails.attackRange)
         {
-            enemy.SwitchState(enemy.attackingState);
+            enemy.SwitchState(enemy.chaseState);
         }
     }
+
 }

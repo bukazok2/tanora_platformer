@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6775754919843831404}
   - component: {fileID: 8300320575084528375}
   - component: {fileID: -1834184982647152723}
+  - component: {fileID: 2630215197605176318}
   m_Layer: 0
   m_Name: EnemyHolder
   m_TagString: Untagged
@@ -31,7 +32,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8300320575084528375
 MonoBehaviour:
@@ -68,3 +69,17 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &2630215197605176318
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2077903896251592677}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d648ad3e27051a49b361e2767cb4417, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemy: {fileID: 2077903896251592677}
+  enemyDetails: {fileID: 11400000, guid: 6987fe737df4fba4dbf773f8e4fefca7, type: 2}

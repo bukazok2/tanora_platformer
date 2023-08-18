@@ -143,7 +143,7 @@ public class Player : MonoBehaviour
         this.isGrounded = Physics.CheckSphere(spherePosition, groundedRadius, groundLayers,
             QueryTriggerInteraction.Ignore);
 
-        Debug.Log(this.isGrounded);
+        //Debug.Log(this.isGrounded);
     }
 
     private void JumpAndGravity()

@@ -16,7 +16,7 @@ public class Enemy : MonoBehaviour
     private NavMeshAgent agent;
     private GameObject enemyVisualCache;
 
-    private EnemyState state = EnemyState.Idle;
+    //private EnemyState state = EnemyState.Idle;
 
     private void Start()
     {
@@ -37,8 +37,8 @@ public class Enemy : MonoBehaviour
 
     private void Update()
     {
-        float dist = Vector3.Distance(Player.Instance.transform.position, this.transform.position);
-
+        //float dist = Vector3.Distance(Player.Instance.transform.position, this.transform.position);
+        /*
         this.FindState(dist);
 
         if(this.state == EnemyState.Chase)
@@ -53,14 +53,15 @@ public class Enemy : MonoBehaviour
         {
             this.Idle();
         }
+        */
     }
-
+    /*
     private void Idle()
     {
         this.agent.SetDestination(this.transform.position);
         this.agent.enabled = false;
     }
-
+    
     private void MoveToTarget()
     {
         this.agent.enabled = true;
@@ -82,7 +83,7 @@ public class Enemy : MonoBehaviour
             this.state = EnemyState.Idle;
         }
     }
-
+    
     private void OnDrawGizmos()
     {
         if (this.state == EnemyState.Chase)
@@ -108,4 +109,5 @@ public class Enemy : MonoBehaviour
 
         Gizmos.DrawWireSphere(this.transform.position, this.enemyDetails.aggroRange);
     }
+    */
 }

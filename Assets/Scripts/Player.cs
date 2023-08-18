@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, ITakeDamage
 {
     public static Player Instance;
 
@@ -211,5 +211,10 @@ public class Player : MonoBehaviour
             // event fire
             ic.Collect();
         }
+    }
+
+    public void TakeDamage(float damage)
+    {
+        Debug.Log("Damage taken: " + damage);
     }
 }

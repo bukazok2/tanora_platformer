@@ -16,3 +16,5 @@ MonoBehaviour:
   enemyGameobject: {fileID: 4069514996090103043, guid: 911aba9c50e04d541a4ffd0d67ba49b0, type: 3}
   speed: 4
   dmg: 1
+  aggroRange: 15
+  attackRange: 5

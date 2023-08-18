@@ -19,7 +19,10 @@ public class Coin : MonoBehaviour, ICollectable
     public void Collect()
     {
         Debug.Log("Biztos a player jött nekem");
-        Player.Instance.AddScore(1);
-        Destroy(this.gameObject);
+        if(Player.Instance != null)
+        {
+            Player.Instance.AddScore(1);
+            Destroy(this.gameObject);
+        }
     }
 }

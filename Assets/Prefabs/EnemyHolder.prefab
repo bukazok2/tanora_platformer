@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 746e49541b48bd84ca33c5009f8368eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bullet: {fileID: 4774550341468440351, guid: 590fca9e954d41044af910fc9c456fe0, type: 3}
   enemyDetails: {fileID: 11400000, guid: 6987fe737df4fba4dbf773f8e4fefca7, type: 2}
 --- !u!195 &-1834184982647152723
 NavMeshAgent:

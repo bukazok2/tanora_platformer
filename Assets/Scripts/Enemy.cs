@@ -6,11 +6,14 @@ public enum EnemyState
 {
     Idle,
     Chase,
-    Attacking
+    Attacking,
+    Timeout,
 }
 
 public class Enemy : MonoBehaviour
 {
+    [SerializeField] GameObject bullet;
+
     [SerializeField] EnemyScriptable enemyDetails;
 
     private NavMeshAgent agent;
@@ -18,10 +21,10 @@ public class Enemy : MonoBehaviour
 
     private EnemyState state = EnemyState.Idle;
 
-    private void Start()
-    {
+    private Transform bulletSpawnPointCache;
 
-    }
+    private float timeoutDuration = 2.5f;
+    private float timeoutTimer = 2.5f;
 
     public void InitEnemy(EnemyScriptable enemyDetails)
     {
@@ -32,7 +35,7 @@ public class Enemy : MonoBehaviour
 
         this.agent = GetComponent<NavMeshAgent>();
 
-       
+        this.bulletSpawnPointCache = this.enemyVisualCache.transform.Find("BulletSpawnPoint");
     }
 
     private void Update()
@@ -41,18 +44,53 @@ public class Enemy : MonoBehaviour
 
         this.FindState(dist);
 
-        if(this.state == EnemyState.Chase)
+        if (this.state == EnemyState.Chase)
         {
             this.MoveToTarget();
         }
-        else if(this.state == EnemyState.Attacking)
+        else if (this.state == EnemyState.Attacking)
         {
-            // attack
+            this.Attack();
         }
-        else if(this.state == EnemyState.Idle)
+        else if (this.state == EnemyState.Idle)
         {
             this.Idle();
         }
+        else if (this.state == EnemyState.Timeout)
+        {
+            this.Timeout();
+        }
+    }
+
+    private void Timeout()
+    {
+        if (this.timeoutTimer > 0f)
+        {
+            this.timeoutTimer -= Time.deltaTime;
+        }
+        else
+        {
+            this.timeoutTimer = this.timeoutDuration;
+            this.state = EnemyState.Idle;
+        }
+    }
+
+    private void Attack()
+    {
+        this.agent.SetDestination(this.transform.position);
+        this.RotateToPlayer();
+
+        GameObject bulletCache = Instantiate(this.bullet, this.bulletSpawnPointCache.position, Quaternion.identity);
+        Bullet b = bulletCache.GetComponent<Bullet>();
+        b.BulletInit(Player.Instance.gameObject);
+
+        this.state = EnemyState.Timeout;
+    }
+
+    private void RotateToPlayer()
+    {
+        Vector3 direction = Player.Instance.transform.position - this.transform.position;
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
     }
 
     private void Idle()
@@ -69,11 +107,14 @@ public class Enemy : MonoBehaviour
 
     private void FindState(float distance)
     {
-        if(distance <= this.enemyDetails.aggroRange && distance >= this.enemyDetails.attackRange)
+        if (this.state == EnemyState.Timeout)
+            return;
+
+        if (distance <= this.enemyDetails.aggroRange && distance >= this.enemyDetails.attackRange)
         {
             this.state = EnemyState.Chase;
         }
-        else if(distance <= this.enemyDetails.attackRange)
+        else if (distance <= this.enemyDetails.attackRange)
         {
             this.state = EnemyState.Attacking;
         }
@@ -98,11 +139,11 @@ public class Enemy : MonoBehaviour
             Gizmos.color = Color.blue;
         }
 
-        Gizmos.DrawWireSphere(this.transform.position,1f);
+        Gizmos.DrawWireSphere(this.transform.position, 1f);
 
         Gizmos.color = Color.magenta;
 
-        Gizmos.DrawWireSphere(this.transform.position,this.enemyDetails.attackRange);
+        Gizmos.DrawWireSphere(this.transform.position, this.enemyDetails.attackRange);
 
         Gizmos.color = Color.yellow;
 

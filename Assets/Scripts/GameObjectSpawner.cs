@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class GameObjectSpawner : MonoBehaviour
 {
+    public static Dictionary<Enemy, GameObject> spawnedEnemies = new Dictionary<Enemy, GameObject>();
+
     [SerializeField] GameObject enemy;
 
     [SerializeField] List<EnemyScriptable> enemies;
@@ -13,6 +15,21 @@ public class GameObjectSpawner : MonoBehaviour
     private void Start()
     {
         Invoke("Spawn", 1f);
+        Humanoid.OnHumanoidDie += Enemy_OnEnemyDie;
+    }
+
+    private void Enemy_OnEnemyDie(Humanoid obj)
+    {
+        Enemy e = null;
+        if (obj is Enemy)
+        {
+            e = (Enemy)obj;
+        }
+
+        if (spawnedEnemies.ContainsKey(e))
+        {
+            spawnedEnemies.Remove(e);
+        }
     }
 
     public void Spawn()
@@ -23,6 +40,7 @@ public class GameObjectSpawner : MonoBehaviour
             GameObject enemyCache = Instantiate(enemy, this.transform.position, Quaternion.identity);
             Enemy e = enemyCache.GetComponent<Enemy>();
             e.InitEnemy(item);
+            spawnedEnemies.Add(e, e.gameObject);
         }
     }
 

@@ -9,4 +9,5 @@ public class EnemyScriptable : ScriptableObject
     [SerializeField] public float dmg;
     [SerializeField] public float aggroRange = 15f;
     [SerializeField] public float attackRange = 1.5f;
+    [SerializeField] public float maxHp = 5;
 }

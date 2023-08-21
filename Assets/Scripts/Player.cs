@@ -4,12 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Player : MonoBehaviour, ITakeDamage
+public class Player : Humanoid
 {
+    [SerializeField] float maxHp;
+
     public static Player Instance;
 
     public static event Action<Player> OnPlayerSpawned = delegate { };
     public static event Action<Player> OnPlayerJump = delegate { };
+    public static event Action<Player> OnPlayerDie = delegate { };
 
     private CharacterController characterController;
     private PlayerInput inputActions;
@@ -79,11 +82,21 @@ public class Player : MonoBehaviour, ITakeDamage
         this.inputActions.Player.Enable();
         this.inputActions.Player.Jump.performed += Jump_performed;
         this.inputActions.Player.Movement.performed += Movement_performed;
+        this.inputActions.Player.Attack.performed += Attack_performed;
 
         this.jumpTimeoutDelta = jumpTimeout;
         this.fallTimeoutDelta = fallTimeout;
 
+        this.hp = this.maxHp;
+
+        this.bulletSpawnPoint = this.transform.Find("BulletSpawnPoint");
+
         OnPlayerSpawned?.Invoke(this);
+    }
+
+    private void Attack_performed(InputAction.CallbackContext obj)
+    {
+        base.Attack();
     }
 
     private void Movement_performed(InputAction.CallbackContext context)
@@ -102,6 +115,7 @@ public class Player : MonoBehaviour, ITakeDamage
 
     private void Update()
     {
+        this.FindClosestTarget();
         this.JumpAndGravity();
         this.GroundedCheck();
         this.Move();
@@ -130,6 +144,13 @@ public class Player : MonoBehaviour, ITakeDamage
         }
 
         Vector3 targetDirection = new Vector3(inputVector.x, 0.0f, inputVector.y);
+
+        if (inputVector != Vector2.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
+            this.transform.rotation = targetRotation;
+        }
+
         // move the player
         characterController.Move(targetDirection * (currentSpeed * Time.deltaTime) +
                              new Vector3(0.0f, this.verticalVelocity, 0.0f) * Time.deltaTime);
@@ -213,8 +234,24 @@ public class Player : MonoBehaviour, ITakeDamage
         }
     }
 
-    public void TakeDamage(float damage)
+    private void FindClosestTarget()
     {
-        Debug.Log("Damage taken: " + damage);
+        float minDist = float.PositiveInfinity;
+        bool found = false;
+        foreach (var item in GameObjectSpawner.spawnedEnemies)
+        {
+            float distance = Vector3.Distance(this.transform.position, item.Value.transform.position);
+            if (distance < minDist)
+            {
+                minDist = distance;
+                this.target = item.Value;
+                found = true;
+            }
+        }
+
+        if (!found)
+        {
+            this.target = null;
+        }
     }
 }

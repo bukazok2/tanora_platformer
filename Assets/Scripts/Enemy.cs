@@ -10,18 +10,14 @@ public enum EnemyState
     Timeout,
 }
 
-public class Enemy : MonoBehaviour
+public class Enemy : Humanoid
 {
-    [SerializeField] GameObject bullet;
-
     [SerializeField] EnemyScriptable enemyDetails;
 
     private NavMeshAgent agent;
     private GameObject enemyVisualCache;
 
     private EnemyState state = EnemyState.Idle;
-
-    private Transform bulletSpawnPointCache;
 
     private float timeoutDuration = 2.5f;
     private float timeoutTimer = 2.5f;
@@ -35,11 +31,16 @@ public class Enemy : MonoBehaviour
 
         this.agent = GetComponent<NavMeshAgent>();
 
-        this.bulletSpawnPointCache = this.enemyVisualCache.transform.Find("BulletSpawnPoint");
+        this.bulletSpawnPoint = this.enemyVisualCache.transform.Find("BulletSpawnPoint");
+        this.hp = this.enemyDetails.maxHp;
+        this.target = Player.Instance.gameObject;
     }
 
     private void Update()
     {
+        if (Player.Instance == null)
+            return;
+
         float dist = Vector3.Distance(Player.Instance.transform.position, this.transform.position);
 
         this.FindState(dist);
@@ -75,22 +76,11 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private void Attack()
+    protected override void Attack()
     {
+        base.Attack();
         this.agent.SetDestination(this.transform.position);
-        this.RotateToPlayer();
-
-        GameObject bulletCache = Instantiate(this.bullet, this.bulletSpawnPointCache.position, Quaternion.identity);
-        Bullet b = bulletCache.GetComponent<Bullet>();
-        b.BulletInit(Player.Instance.gameObject);
-
         this.state = EnemyState.Timeout;
-    }
-
-    private void RotateToPlayer()
-    {
-        Vector3 direction = Player.Instance.transform.position - this.transform.position;
-        Quaternion targetRotation = Quaternion.LookRotation(direction);
     }
 
     private void Idle()

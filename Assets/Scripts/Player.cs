@@ -111,6 +111,7 @@ public class Player : Humanoid
     {
         this.isJumping = true;
         Debug.Log("Jumping : " + this.isJumping);
+
     }
 
     private void Update()

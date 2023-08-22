@@ -3,7 +3,6 @@ using UnityEngine;
 
 public abstract class Humanoid : MonoBehaviour, ITakeDamage
 {
-    [SerializeField] protected GameObject bullet;
     public static event Action<Humanoid> OnHumanoidDie = delegate { };
 
     protected float hp;
@@ -39,8 +38,9 @@ public abstract class Humanoid : MonoBehaviour, ITakeDamage
             return;
 
         this.RotateToTarget();
-        GameObject bulletCache = Instantiate(this.bullet, this.bulletSpawnPoint.position, Quaternion.identity);
-        Bullet b = bulletCache.GetComponent<Bullet>();
+        //GameObject bulletCache = Instantiate(this.bullet, this.bulletSpawnPoint.position, Quaternion.identity);
+        Bullet b = AssetManager.Instance.GetBullet();
+        b.transform.position = this.bulletSpawnPoint.position;
         b.BulletInit(this.target);
     }
 }

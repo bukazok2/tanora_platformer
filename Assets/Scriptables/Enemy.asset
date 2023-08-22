@@ -18,3 +18,4 @@ MonoBehaviour:
   dmg: 1
   aggroRange: 15
   attackRange: 5
+  maxHp: 5000

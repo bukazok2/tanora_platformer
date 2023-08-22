@@ -12,12 +12,12 @@ public class Bullet : MonoBehaviour
             Destroy(this.gameObject);
         }
 
-        this.transform.DOMove(target.transform.position, 1f).OnComplete(DestroyMe);
+        this.transform.DOMove(target.transform.position, 1f).SetSpeedBased(true).OnComplete(DestroyMe);
     }
 
     private void DestroyMe()
     {
-        Destroy(this.gameObject);
+        AssetManager.Instance.Release(this);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -27,6 +27,17 @@ public class Bullet : MonoBehaviour
         if (damageable != null)
         {
             damageable.TakeDamage(1f);
+            DestroyMe();
         }
+    }
+
+    private void OnEnable()
+    {
+        Debug.Log("Enabled");
+    }
+
+    private void OnDisable()
+    {
+        Debug.Log("Disabled");
     }
 }

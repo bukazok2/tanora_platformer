@@ -66,11 +66,13 @@ public class Player : Humanoid
 
     int score = 0;
 
-    public void AddScore(int score)
-    {
-        this.score += score;
-        Debug.Log(this.score);
-    }
+    private Animator animator;
+    private int _animIDSpeed;
+    private int _animIDGrounded;
+    private int _animIDJump;
+    private int _animIDFreeFall;
+    private int _animIDMotionSpeed;
+    private float _animationBlend;
 
     private void Start()
     {
@@ -78,6 +80,7 @@ public class Player : Humanoid
             Instance = this;
 
         this.characterController = this.GetComponent<CharacterController>();
+        this.animator = this.GetComponent<Animator>();
         this.inputActions = new PlayerInput();
         this.inputActions.Player.Enable();
         this.inputActions.Player.Jump.performed += Jump_performed;
@@ -91,7 +94,25 @@ public class Player : Humanoid
 
         this.bulletSpawnPoint = this.transform.Find("BulletSpawnPoint");
 
+        this.AssignAnimationIDs();
+
         OnPlayerSpawned?.Invoke(this);
+
+    }
+
+    private void AssignAnimationIDs()
+    {
+        _animIDSpeed = Animator.StringToHash("Speed");
+        _animIDGrounded = Animator.StringToHash("Grounded");
+        _animIDJump = Animator.StringToHash("Jump");
+        _animIDFreeFall = Animator.StringToHash("FreeFall");
+        _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
+    }
+
+    public void AddScore(int score)
+    {
+        this.score += score;
+        Debug.Log(this.score);
     }
 
     private void Attack_performed(InputAction.CallbackContext obj)
@@ -144,6 +165,12 @@ public class Player : Humanoid
             currentSpeed = targetSpeed;
         }
 
+        _animationBlend = Mathf.Lerp(_animationBlend, targetSpeed, Time.deltaTime * this.speedChangeRate);
+        if (_animationBlend < 0.01f)
+        {
+            _animationBlend = 0f;
+        }
+
         Vector3 targetDirection = new Vector3(inputVector.x, 0.0f, inputVector.y);
 
         if (inputVector != Vector2.zero)
@@ -155,6 +182,9 @@ public class Player : Humanoid
         // move the player
         characterController.Move(targetDirection * (currentSpeed * Time.deltaTime) +
                              new Vector3(0.0f, this.verticalVelocity, 0.0f) * Time.deltaTime);
+
+        this.animator.SetFloat(_animIDSpeed, _animationBlend);
+        this.animator.SetFloat(_animIDMotionSpeed, 1f);
     }
 
     private void GroundedCheck()
@@ -165,7 +195,7 @@ public class Player : Humanoid
         this.isGrounded = Physics.CheckSphere(spherePosition, groundedRadius, groundLayers,
             QueryTriggerInteraction.Ignore);
 
-        Debug.Log(this.isGrounded);
+        this.animator.SetBool(_animIDGrounded, this.isGrounded);
     }
 
     private void JumpAndGravity()
@@ -174,6 +204,9 @@ public class Player : Humanoid
         {
             // reset the fall timeout timer
             fallTimeoutDelta = fallTimeout;
+
+            this.animator.SetBool(_animIDJump, false);
+            this.animator.SetBool(_animIDFreeFall, false);
 
             // stop our velocity dropping infinitely when grounded
             if (this.verticalVelocity < 0.0f)
@@ -185,6 +218,7 @@ public class Player : Humanoid
             {
                 OnPlayerJump?.Invoke(this);
                 this.verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * this.gravity);
+                this.animator.SetBool(_animIDJump, true);
             }
 
             if (jumpTimeoutDelta >= 0.0f)
@@ -200,6 +234,10 @@ public class Player : Humanoid
             {
                 this.fallTimeoutDelta -= Time.deltaTime;
             }
+            else
+            {
+                this.animator.SetBool(_animIDFreeFall, true);
+            }
 
             this.isJumping = false;
         }
@@ -209,7 +247,6 @@ public class Player : Humanoid
             this.verticalVelocity += this.gravity * Time.deltaTime;
         }
     }
-
 
     private void OnDrawGizmos()
     {
